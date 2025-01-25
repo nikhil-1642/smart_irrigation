@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Irrigation Predictor</title>
+    <style>
+        body {
+    position: relative;
+    font-family: Serif,Georgia;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("https://raw.githubusercontent.com/Vaishnavi-Peddi/Irrigation-/main/IMG-20250124-WA0019.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.8; /* Set the opacity for the background */
+    z-index: -1; /* Push the background behind the content */
+}
+
+        h1 {
+            color: #111b16;
+            margin-bottom: 20px;
+            text-decoration: wavy;
+            background-color: rgb(231, 234, 232);
+            border-radius: 5px;;
+        }
+    
+        form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    height: auto; /* Ensure the form adjusts height automatically */
+    opacity: 80%;
+    transition: all 0.3s ease-in-out; /* Add smooth transition */
+}
+
+form:hover {
+    width: 309px; /* 3% zoom on width */
+    height: auto; /* Ensure height adjusts proportionally */
+    transform: scale(1.08); /* Zoom in on hover */
+    opacity: 100%; /* Fully opaque on hover */
+}
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            background: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        p {
+            margin-top: 20px;
+            margin-bottom: 16px;
+            color: #0d0202;
+            background-color: rgb(244, 242, 242);
+            border-radius: 5px;
+            opacity: 100%;
+            padding: 8px;
+            text-size-adjust: auto;
+            text-decoration: double;
+        }
+       a{
+        width:125px;
+        height: 20px;
+        color:#125414;
+        background: #c6ecc6;
+        font-size: 15px;
+        padding: 10px;
+        padding-bottom:8px;
+        border-radius: 80px;
+        text-decoration: none;
+        text-align: center;
+       }
+
+       
+
+    </style>
+</head>
+<body>
+    <h1>SMART IRRIGATION</h1>
+
+    <form id="predictionForm">
+        <label for="soil_moisture">Soil Moisture:</label>
+        <input type="number" step="0.01" id="soil_moisture" name="soil_moisture" required>
+        
+        <label for="crop_type">Crop Type:</label>
+        <select id="crop_type" name="crop_type" required>
+            <option value="0">Wheat</option>
+            <option value="1">Corn</option>
+            <option value="2">Rice</option>
+            <option value="3">Soybean</option>
+            <option value="4">Barley</option>
+        </select>
+        
+        <label for="rain_probability">Rain Probability:</label>
+        <input type="number" step="0.01" id="rain_probability" name="rain_probability" required>
+        
+        <label for="growth_state">Growth State:</label>
+        <select id="growth_state" name="growth_state" required>
+            <option value="0">Seedling</option>
+            <option value="1">Vegetative</option>
+            <option value="2">Flowering</option>
+            <option value="3">Mature</option>
+            <option value="4">Harvest</option>
+        </select>
+        
+        <button type="button" onclick="submitForm()">Predict</button>
+    </form>
+    <p id="result"></p>
+<a href="https://vaishnavi-peddi.github.io/irr/">ABOUT PROJECT</a>
+    <script>
+        function submitForm() {
+            const formData = {
+                soil_moisture: parseFloat(document.getElementById("soil_moisture").value),
+                crop_type: parseInt(document.getElementById("crop_type").value),
+                rain_probability: parseFloat(document.getElementById("rain_probability").value),
+                growth_state: parseInt(document.getElementById("growth_state").value)
+            };
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("result").innerText = `Error: ${data.error}`;
+                } else {
+                    document.getElementById("result").innerText = 
+                        `Water Level: ${data.water_level}, Flow Rate: ${data.flow_rate}, Irrigation Duration: ${data.irrigation_duration}`;
+                }
+            })
+            .catch(error => {
+                document.getElementById("result").innerText = `Error: ${error}`;
+            });
+        }
+    </script>
+</body>
+</html>
