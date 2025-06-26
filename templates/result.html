@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Irrigation Prediction Result</title>
+  <style>
+     @keyframes borderGlow {
+      0% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+      50% { box-shadow: 0 0 30px rgba(255, 255, 255, 1); }
+      100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 0.75; }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: transparent;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    /* Fullscreen background video */
+    .background-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+      opacity: 0.75;
+      pointer-events: none;
+      animation: fadeIn 2s ease-in;
+    }
+
+    h2 {
+      border: 2px solid #4CAF50;
+      border-radius: 10px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #ffffff;
+      font-size: 2em;
+      font-weight: bold;
+      margin: 10px 0;
+      text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(161, 23, 23, 0.1);
+    }
+
+    .result-box {
+      position: relative;
+      overflow: hidden;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 1000px;
+      padding: 5px;
+      margin: auto;
+      z-index: 1;
+    }
+
+    .top-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .crop-side, .video-side, .result-item {
+      animation: borderGlow 3s ease-in-out infinite;
+      opacity: 0.75;
+      transition: transform 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease;
+    }
+
+    .crop-side:hover, .video-side:hover, .result-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      opacity: 1;
+    }
+
+    .crop-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #ffffff;
+      border: 3px solid #4CAF50;
+      border-radius: 15px;
+      padding: 5px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .crop-side img {
+      width: 300px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .crop-side p {
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+
+    .video-side {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      background-color: #ffffff;
+      border: 3px solid #4CAF50;
+      border-radius: 15px;
+      padding: 5px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    #irrigationVideo {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 5px solid #4CAF50;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .controls-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    #timerDisplay {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2f6636;
+    }
+
+    .btn {
+      padding: 12px 25px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #3e8e41;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .result-item {
+      background-color: #ffffff;
+      border: 2px solid #4CAF50;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 250px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .result-item img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .result-item p {
+      font-size: 18px;
+      color: #333;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Video -->
+  <video class="background-video" autoplay muted loop>
+    <source src="https://v.ftcdn.net/11/68/58/05/700_F_1168580598_A0gAT081ZkvIXPMvbijOpko59oduX9LT_ST.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
+  <div class="result-box">
+    <h2>Irrigation Prediction Result</h2>
+
+    <div class="top-section">
+      <div class="crop-side">
+        <img src="{{ result.crop_image }}" alt="Selected Crop">
+        <p><strong>Selected Crop</strong></p>
+      </div>
+
+      <div class="video-side">
+        <video autoplay muted loop id="irrigationVideo">
+          <source src="https://cdn.pixabay.com/video/2017/01/27/7549-201442276_large.mp4" type="video/mp4">
+        </video>
+        <div class="controls-box">
+          <div id="timerDisplay">Timer: 00:00</div>
+          <button class="btn" onclick="stopIrrigation()">Stop</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-row">
+      <div class="result-item">
+        <img src="https://5.imimg.com/data5/SELLER/Default/2025/1/484291255/LH/SG/QO/91103478/350-mm-float-type-level-indicator-500x500.jpg" alt="Water Level">
+        <p><strong>Water Level:</strong> {{ result.water_level }}</p>
+      </div>
+      <div class="result-item">
+        <img src="https://waterpumpsnow.com.au/images/Reefe-multistage-pressure-pump-tank-switch-and-gauge.jpg" alt="Flow Rate">
+        <p><strong>Flow Rate:</strong> {{ result.flow_rate }}</p>
+      </div>
+      <div class="result-item">
+        <img src="https://th.bing.com/th/id/OIP.ALkzceXDBS5aBMYoshF5KQAAAA?rs=1&pid=ImgDetMain" alt="Duration">
+        <p><strong>Duration:</strong> {{ result.irrigation_duration }} mins</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const irrigationDuration = parseInt("{{ result.irrigation_duration }}");
+    let seconds = 0;
+    let isRunning = true;
+    const timerDisplay = document.getElementById("timerDisplay");
+    let timerInterval;
+
+    function formatTime(secs) {
+      let mins = Math.floor(secs / 60);
+      let remSecs = secs % 60;
+      return `${mins.toString().padStart(2, '0')}:${remSecs.toString().padStart(2, '0')}`;
+    }
+
+    function updateTimer() {
+      timerInterval = setInterval(() => {
+        if (!isRunning) return;
+        seconds++;
+        timerDisplay.textContent = "Timer: " + formatTime(seconds);
+        if (seconds >= irrigationDuration * 60) {
+          clearInterval(timerInterval);
+        }
+      }, 1000);
+    }
+
+    function stopIrrigation() {
+      isRunning = false;
+      clearInterval(timerInterval);
+      document.getElementById("irrigationVideo").pause();
+
+      const message = seconds >= irrigationDuration * 60
+        ? "✅ Irrigation was already completed."
+        : `⛔ Irrigation stopped early at ${formatTime(seconds)}.`;
+
+      sendStatusSMS(message);
+      alert(message);
+
+      if (seconds < irrigationDuration * 60) {
+        makeCallAndAlert(message);
+      }
+    }
+
+    function sendStatusSMS(message) {
+      fetch('/send_status_sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+      }).then(res => res.json())
+        .then(data => console.log("SMS Sent:", data))
+        .catch(err => console.error("SMS Error:", err));
+    }
+
+    function makeCallAndAlert(message) {
+      fetch('/stop_timer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+      }).then(res => res.json())
+        .then(data => console.log("Call initiated:", data))
+        .catch(err => console.error("Call Error:", err));
+    }
+
+    window.onload = updateTimer;
+  </script>
+
+</body>
+</html>
